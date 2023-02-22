@@ -1,15 +1,16 @@
 package avro.playground;
 
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import org.apache.avro.Schema;
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 public class AvroSerializer {
 
@@ -39,5 +40,12 @@ public class AvroSerializer {
         encoder.flush();
 
         return output.toByteArray();
+    }
+
+    public byte[] serializeWithKafkaSerializer(GenericRecord record) {
+        try (var serializer = new KafkaAvroSerializer()) {
+            serializer.configure(Map.of("schema.registry.url", "mock://my-scope"), false);
+            return serializer.serialize("topic", record);
+        }
     }
 }

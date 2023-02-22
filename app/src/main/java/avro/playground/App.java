@@ -3,12 +3,36 @@
  */
 package avro.playground;
 
-public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+import io.vertx.core.Vertx;
+import io.vertx.ext.web.client.WebClient;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 
-    public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+public class App {
+
+    public static void main(String[] args) throws IOException {
+        var vertx = Vertx.vertx();
+        var serializer = new AvroSerializer();
+
+        var schemaFile = new File(Objects.requireNonNull(App.class.getClassLoader().getResource("avro/transactions.avsc")).getFile()).toPath();
+        var schema = new AvroSchemaLoader(WebClient.create(vertx)).loadFromFile(schemaFile);
+
+        GenericRecord transaction1 = new GenericData.Record(schema);
+        transaction1.put("id", "t1");
+        transaction1.put("amount", 1500.0);
+
+        try {
+            Files.write(Path.of("/tmp/transaction.avro"), serializer.serializeWithKafkaSerializer(transaction1));
+        }
+        catch (Exception e ) {
+            e.printStackTrace();
+        }
+
+        System.exit(0);
     }
 }

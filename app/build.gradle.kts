@@ -5,9 +5,20 @@ plugins {
 
 repositories {
     mavenCentral()
+
+    maven {
+        url = uri("https://packages.confluent.io/maven/")
+        name = "Confluent"
+        content {
+            includeGroup("io.confluent")
+            includeGroup("org.apache.kafka")
+        }
+    }
 }
 
 dependencies {
+    implementation("io.confluent:kafka-avro-serializer:5.3.0")
+    implementation("org.apache.kafka:kafka-clients:3.4.0")
     implementation("io.vertx:vertx-web-client:4.2.7")
     implementation("org.apache.avro:avro:1.11.1")
 
